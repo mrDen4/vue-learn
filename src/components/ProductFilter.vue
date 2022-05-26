@@ -33,13 +33,13 @@
       <fieldset class="form__block">
         <legend class="form__legend">Цвет</legend>
         <ul class="colors">
-          <li class="colors__item" v-for="color in colors" :key="color.name">
-            <label class="colors__label" :for="color.name">
+          <li class="colors__item" v-for="color in colors" :key="color">
+            <label class="colors__label" :for="color">
               <input class="colors__radio sr-only" type="radio" name="color"
-                     :value="color.name"
+                     :value="color"
                      v-model="currentColor"
-                     :id="color.name">
-              <span class="colors__value" :style="'background-color:' + color.name + ';'">
+                     :id="color">
+              <span class="colors__value" :style="'background-color:' + color + ';'">
                   </span>
             </label>
           </li>
@@ -121,7 +121,7 @@
 
 <script>
 import categories from '@/data/productsCategory';
-import colors from '@/data/productsColors';
+// import colors from '@/data/productsColors';
 
 export default {
   data() {
@@ -132,13 +132,10 @@ export default {
       currentColor: 'blue',
     };
   },
-  props: ['priceFrom', 'priceTo', 'categoryId', 'color'],
+  props: ['priceFrom', 'priceTo', 'categoryId', 'color', 'colors'],
   computed: {
     categories() {
       return categories;
-    },
-    colors() {
-      return colors;
     },
   },
   methods: {
