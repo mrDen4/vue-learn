@@ -35,7 +35,7 @@
           {{product.title}}
         </h2>
         <div class="item__form">
-          <form class="form" action="#" method="POST">
+          <form class="form" action="#" method="POST" @submit.prevent="addToCart">
             <b class="item__price">
               {{product.price | numberFormat}} ₽
             </b>
@@ -105,15 +105,17 @@
 
             <div class="item__row">
               <div class="form__counter">
-                <button type="button" aria-label="Убрать один товар">
+                <button type="button" aria-label="Убрать один товар"
+                        @click="() => this.count != 0 ? this.count -= 1 : this.count">
                   <svg width="12" height="12" fill="currentColor">
                     <use xlink:href="#icon-minus"></use>
                   </svg>
                 </button>
 
-                <input aria-label="test" type="text" value="1" name="count">
+                <input aria-label="test" type="text" v-model="count" name="count">
 
-                <button type="button" aria-label="Добавить один товар">
+                <button type="button" aria-label="Добавить один товар"
+                        @click="() => this.count += 1">
                   <svg width="12" height="12" fill="currentColor">
                     <use xlink:href="#icon-plus"></use>
                   </svg>
@@ -204,6 +206,11 @@ import goToPage from '@/helpers/goToPage';
 import numberFormat from '@/helpers/numberFormat';
 
 export default {
+  data() {
+    return {
+      count: 2,
+    };
+  },
   filters: {
     numberFormat,
   },
@@ -217,6 +224,12 @@ export default {
   },
   methods: {
     goToPage,
+    addToCart() {
+      this.$store.commit(
+        'addToCartProducts',
+        { productId: this.product.id, amount: this.count },
+      );
+    },
   },
 
 };
