@@ -208,7 +208,7 @@ import numberFormat from '@/helpers/numberFormat';
 export default {
   data() {
     return {
-      count: 2,
+      count: 1,
     };
   },
   filters: {
