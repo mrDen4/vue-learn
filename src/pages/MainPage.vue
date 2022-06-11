@@ -13,9 +13,9 @@
         :price-from.sync="filterPriceFrom"
         :price-to.sync="filterPriceTo"
         :category-id.sync="filterCategoryId"
-        :color.sync="filterColor"
-        :colors="uniqColors"/>
+        :color-id.sync="filterColor"/>
       <section class="catalog">
+        <h1 v-if="productsLoading">Идет загрузка товаров ...</h1>
         <ProductList :products="products"/>
         <BasePagination v-model="page" :per-page="productsPerPage" :count-items="countProducts"/>
       </section>
@@ -27,7 +27,8 @@
 import ProductList from '@/components/ProductList.vue';
 import BasePagination from '@/components/BasePagination.vue';
 import ProductFilter from '@/components/ProductFilter.vue';
-import products from '@/data/products';
+import axios from 'axios';
+import { BASE_URL_API } from '@/confing';
 
 export default {
   components: { ProductFilter, ProductList, BasePagination },
@@ -36,49 +37,64 @@ export default {
       filterPriceFrom: 0,
       filterPriceTo: 0,
       filterCategoryId: 0,
-      filterColor: 'blue',
+      filterColor: 0,
       page: 1,
       productsPerPage: 5,
+      productsData: null,
+      productsLoading: false,
+      productsColors: [],
     };
   },
   computed: {
-    uniqColors() {
-      const productsColor = products.map((product) => product.color);
-      const productsColorSet = new Set(productsColor);
-      const uniqColors = [...productsColorSet];
-      return uniqColors;
-    },
-    filterProducts() {
-      let filterProducts = products;
-
-      if (this.filterPriceFrom > 0) {
-        filterProducts = filterProducts.filter((product) => product.price > this.filterPriceFrom);
-      }
-
-      if (this.filterPriceTo > 0) {
-        filterProducts = filterProducts.filter((product) => product.price < this.filterPriceTo);
-      }
-
-      if (this.filterCategoryId) {
-        filterProducts = filterProducts
-          .filter((product) => product.categoryId === this.filterCategoryId);
-      }
-
-      if (this.filterColor) {
-        filterProducts = filterProducts
-          .filter((product) => product.color === this.filterColor);
-      }
-
-      return filterProducts;
-    },
     countProducts() {
-      return this.filterProducts.length;
+      return this.productsData ? this.productsData.pagination.total : 0;
     },
     products() {
-      const offset = (this.page - 1) * this.productsPerPage;
-
-      return this.filterProducts.slice(offset, offset + this.productsPerPage);
+      return this.productsData ? this.productsData.items.map((product) => ({
+        ...product,
+        image: product.image.file.url,
+      })) : [];
     },
+  },
+  methods: {
+    loadProducts() {
+      this.productsLoading = true;
+      clearTimeout(this.loadProductsTimer);
+      this.loadProductsTimer = setTimeout(() => {
+        axios.get(`${BASE_URL_API}/products`, {
+          params: {
+            page: this.page,
+            limit: this.productsPerPage,
+            categoryId: this.filterCategoryId,
+            minPrice: this.filterPriceFrom,
+            maxPrice: this.filterPriceTo,
+            colorId: this.filterColor,
+          },
+        })
+          .then((response) => { this.productsData = response.data; })
+          .then(() => { this.productsLoading = false; });
+      }, 0);
+    },
+  },
+  watch: {
+    page() {
+      this.loadProducts();
+    },
+    filterCategoryId() {
+      this.loadProducts();
+    },
+    filterPriceFrom() {
+      this.loadProducts();
+    },
+    filterPriceTo() {
+      this.loadProducts();
+    },
+    filterColor() {
+      this.loadProducts();
+    },
+  },
+  created() {
+    this.loadProducts();
   },
 };
 

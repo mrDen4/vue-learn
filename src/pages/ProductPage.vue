@@ -1,5 +1,6 @@
 <template>
-  <main class="content container">
+  <main class="content container" v-if="productLoading"><h1>Идет загрузка продукта ...</h1></main>
+  <main class="content container" v-else-if="productInfo">
     <div class="content__top">
       <ul class="breadcrumbs">
         <li class="breadcrumbs__item">
@@ -24,7 +25,7 @@
       <div class="item__pics pics">
         <div class="pics__wrapper">
           <img width="570" height="570"
-               :src="product.image"
+               :src="product.image.file.url"
                :alt="product.title">
         </div>
       </div>
@@ -122,9 +123,12 @@
                 </button>
               </div>
 
-              <button class="button button--primery" type="submit">
+              <button class="button button--primery" type="submit"
+                      :disabled="loadingProductAddToCart">
                 В корзину
               </button>
+              <div v-show="loadingProductAddToCart">Товар добавляется в корзину</div>
+              <div v-show="productAddToCart">Товар успешно добавлен в корзину</div>
             </div>
           </form>
         </div>
@@ -200,15 +204,20 @@
 </template>
 
 <script>
-import products from '@/data/products';
-import productsCategory from '@/data/productsCategory';
 import goToPage from '@/helpers/goToPage';
 import numberFormat from '@/helpers/numberFormat';
+import axios from 'axios';
+import { BASE_URL_API } from '@/confing';
+import { mapActions } from 'vuex';
 
 export default {
   data() {
     return {
       count: 1,
+      productInfo: null,
+      productLoading: true,
+      productAddToCart: false,
+      loadingProductAddToCart: false,
     };
   },
   filters: {
@@ -216,22 +225,38 @@ export default {
   },
   computed: {
     product() {
-      return products.find((product) => product.id === +this.$route.params.id);
+      return this.productInfo;
     },
     category() {
-      return productsCategory.find((category) => category.id === this.product.categoryId);
+      return this.productInfo.category;
     },
   },
   methods: {
+    ...mapActions(['addToCartProducts']),
+    loadProduct() {
+      axios.get(`${BASE_URL_API}/products/${+this.$route.params.id}`)
+        .then((response) => { this.productInfo = response.data; })
+        .then(() => { this.productLoading = false; });
+    },
     goToPage,
     addToCart() {
-      this.$store.commit(
-        'addToCartProducts',
-        { productId: this.product.id, amount: this.count },
-      );
+      this.productAddToCart = false;
+      this.loadingProductAddToCart = true;
+      this.addToCartProducts({ productId: this.product.id, amount: this.count })
+        .then(() => {
+          this.productAddToCart = true;
+          this.loadingProductAddToCart = false;
+        });
     },
   },
-
+  watch: {
+    '$route.params.id': {
+      handler() {
+        this.loadProduct();
+      },
+      immediate: true,
+    },
+  },
 };
 
 </script>

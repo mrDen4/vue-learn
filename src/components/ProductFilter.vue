@@ -33,13 +33,13 @@
       <fieldset class="form__block">
         <legend class="form__legend">Цвет</legend>
         <ul class="colors">
-          <li class="colors__item" v-for="color in colors" :key="color">
-            <label class="colors__label" :for="color">
+          <li class="colors__item" v-for="color in colors" :key="color.id">
+            <label class="colors__label" :for="color.id">
               <input class="colors__radio sr-only" type="radio" name="color"
-                     :value="color"
+                     :value="color.id"
                      v-model="currentColor"
-                     :id="color">
-              <span class="colors__value" :style="'background-color:' + color + ';'">
+                     :id="color.id">
+              <span class="colors__value" :style="'background-color:' + color.code + ';'">
                   </span>
             </label>
           </li>
@@ -120,8 +120,8 @@
 </template>
 
 <script>
-import categories from '@/data/productsCategory';
-// import colors from '@/data/productsColors';
+import axios from 'axios';
+import { BASE_URL_API } from '@/confing';
 
 export default {
   data() {
@@ -129,21 +129,36 @@ export default {
       currentPriceFrom: 0,
       currentPriceTo: 0,
       currentCategoryId: 0,
-      currentColor: 'blue',
+      currentColor: 0,
+      categoriesList: null,
+      productsColors: null,
     };
   },
-  props: ['priceFrom', 'priceTo', 'categoryId', 'color', 'colors'],
+  props: ['priceFrom', 'priceTo', 'categoryId', 'colorId'],
   computed: {
     categories() {
-      return categories;
+      return this.categoriesList ? this.categoriesList.items : [];
+    },
+    colors() {
+      return this.productsColors ? this.productsColors : [];
     },
   },
   methods: {
+    loadCategories() {
+      axios.get(`${BASE_URL_API}/productCategories`)
+        .then((response) => {
+          this.categoriesList = response.data;
+        });
+    },
+    loadColors() {
+      axios.get(`${BASE_URL_API}/colors`)
+        .then((response) => { this.productsColors = response.data.items; });
+    },
     submitFilter() {
       this.$emit('update:priceFrom', this.currentPriceFrom);
       this.$emit('update:priceTo', this.currentPriceTo);
       this.$emit('update:categoryId', this.currentCategoryId);
-      this.$emit('update:color', this.currentColor);
+      this.$emit('update:color-id', this.currentColor);
     },
     resetFilter() {
       this.$emit('update:priceFrom', 0);
@@ -153,9 +168,12 @@ export default {
       this.currentPriceFrom = 0;
       this.currentPriceTo = 0;
       this.currentCategoryId = 0;
-      this.currentColor = 'blue';
+      this.currentColor = 0;
     },
-
+  },
+  created() {
+    this.loadCategories();
+    this.loadColors();
   },
 };
 </script>

@@ -119,9 +119,20 @@
 </template>
 
 <script>
+import { mapActions, mapMutations } from 'vuex';
 
 export default {
-
+  created() {
+    const userAccessKey = localStorage.getItem('userAccessKey');
+    if (userAccessKey) {
+      this.updateUserAccessKey(userAccessKey);
+    }
+    this.loadCartProducts();
+  },
+  methods: {
+    ...mapActions(['loadCartProducts']),
+    ...mapMutations(['updateUserAccessKey']),
+  },
 };
 
 </script>
