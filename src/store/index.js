@@ -11,8 +11,14 @@ export default new Vuex.Store({
     userAccessKey: null,
     cartProductsData: [],
     colorProducts: [],
+    orderId: null,
+    orderInfo: [],
   },
   mutations: {
+    addOrderInfo(state, info) {
+      state.orderInfo = info;
+      state.orderId = info.id;
+    },
     resetCartProducts(state) {
       state.cartProducts = [];
     },
@@ -130,6 +136,14 @@ export default new Vuex.Store({
           context.commit('updateCartProductsData', response.data.items);
           context.commit('syncCartProducts');
         });
+    },
+    loadOrderInfo(context, id) {
+      axios.get(`${BASE_URL_API}/orders/${id}`, {
+        params: {
+          userAccessKey: context.state.userAccessKey,
+        },
+      })
+        .then((response) => context.commit('addOrderInfo', response.data));
     },
   },
 });

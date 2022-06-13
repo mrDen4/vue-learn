@@ -110,10 +110,10 @@
           </div>
         </div>
         <OrderCart/>
-        <div class="cart__error form__error-block">
+        <div class="cart__error form__error-block" v-if="errorMessage">
           <h4>Заявка не отправлена!</h4>
           <p>
-            Похоже произошла ошибка. Попробуйте отправить снова или перезагрузите страницу.
+            {{errorMessage}}
           </p>
         </div>
       </form>
@@ -134,24 +134,29 @@ export default {
     return {
       formData: {},
       errorFormData: {},
+      errorMessage: '',
     };
   },
   methods: {
     submitOrder() {
-      // this.errorFormData = {};
+      this.errorFormData = {};
+      this.errorMessage = '';
       axios
-        .post(`${BASE_URL_API}/order`, {
+        .post(`${BASE_URL_API}/orders`, {
           ...this.formData,
         }, {
           params: {
             userAccessKey: this.$store.state.userAccessKey,
           },
         })
-        // .then(() => {
-        //   this.$store.commit('resetCartProducts');
-        // })
-        .catch((response) => {
-          this.errorFormData = response.data;
+        .then((response) => {
+          this.$store.commit('resetCartProducts');
+          this.$store.commit('addOrderInfo', response.data);
+          this.$router.push({ name: 'orderInfo', params: { id: response.data.id } });
+        })
+        .catch((error) => {
+          this.errorFormData = error.response.data.error.request || {};
+          this.errorMessage = error.response.data.error.message || '';
         });
     },
   },
