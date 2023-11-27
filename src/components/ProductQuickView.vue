@@ -187,8 +187,7 @@
           <h3>Дизайн</h3>
 
           <p>
-            Ве</p>
-          <p>локомпьютер Wahoo ELEMNT BOLT очень компактный. Размеры устройства составляют всего
+            Велокомпьютер Wahoo ELEMNT BOLT очень компактный. Размеры устройства составляют всего
             74,6 x 47,3 x 22,1 мм. что не превышает габариты смартфона. Корпус гаджета выполнен из
             черного пластика. Наобращенной к пользователю стороне расположен дисплей диагональю 56
             мм. На дисплей выводятся координаты и скорость, а также полученная со смартфона и
@@ -204,112 +203,60 @@
 </template>
 
 <script>
-// import goToPage from '@/helpers/goToPage';
+import goToPage from '@/helpers/goToPage';
 import axios from 'axios';
 import { BASE_URL_API } from '@/confing';
-import { useStore } from 'vuex';
+import { mapActions } from 'vuex';
 import numberFormat from '@/helpers/numberFormat';
-import { computed, defineComponent, ref } from 'vue';
-import { onBeforeRouteUpdate, useRoute } from 'vue-router';
 
-export default defineComponent({
-  setup() {
-    const route = useRoute();
-    const store = useStore();
-
-    const count = ref(1);
-    const productInfo = ref(null);
-    const productLoading = ref(true);
-    const productAddToCart = ref(false);
-    const loadingProductAddToCart = ref(false);
-
-    const product = computed(() => productInfo.value);
-    const category = computed(() => productInfo.value.category);
-    const pricePretty = computed(() => numberFormat(product.value.price));
-
-    const loadProduct = () => {
-      axios.get(`${BASE_URL_API}/products/${route.params.id}`)
-        .then((response) => { productInfo.value = response.data; })
-        .then(() => { productLoading.value = false; });
-    };
-    const addToCart = () => {
-      productAddToCart.value = false;
-      loadingProductAddToCart.value = true;
-      store.dispatch('addToCartProducts', { productId: product.value.id, amount: count.value })
-        .then(() => {
-          productAddToCart.value = true;
-          loadingProductAddToCart.value = false;
-        });
-    };
-
-    loadProduct();
-
-    onBeforeRouteUpdate(() => {
-      loadProduct();
-    });
-
+export default {
+  props: {
+    productId: { type: [Number, String], required: true },
+  },
+  data() {
     return {
-      count,
-      productInfo,
-      productLoading,
-      productAddToCart,
-      loadingProductAddToCart,
-      product,
-      category,
-      pricePretty,
-
-      loadProduct,
-      addToCart,
+      count: 1,
+      productInfo: null,
+      productLoading: true,
+      productAddToCart: false,
+      loadingProductAddToCart: false,
     };
   },
-
-});
-
-// export default {
-//   data() {
-//     return {
-//       count: 1,
-//       productInfo: null,
-//       productLoading: true,
-//       productAddToCart: false,
-//       loadingProductAddToCart: false,
-//     };
-//   },
-//   computed: {
-//     product() {
-//       return this.productInfo;
-//     },
-//     category() {
-//       return this.productInfo.category;
-//     },
-//     pricePretty() {
-//       return numberFormat(this.product.price);
-//     },
-//   },
-//   methods: {
-//     ...mapActions(['addToCartProducts']),
-//     loadProduct() {
-//       axios.get(`${BASE_URL_API}/products/${+this.$route.params.id}`)
-//         .then((response) => { this.productInfo = response.data; })
-//         .then(() => { this.productLoading = false; });
-//     },
-//     goToPage,
-//     addToCart() {
-//       this.productAddToCart = false;
-//       this.loadingProductAddToCart = true;
-//       this.addToCartProducts({ productId: this.product.id, amount: this.count })
-//         .then(() => {
-//           this.productAddToCart = true;
-//           this.loadingProductAddToCart = false;
-//         });
-//     },
-//   },
-//   created() {
-//     this.loadProduct();
-//   },
-//   beforeRouteUpdate() {
-//     this.loadProduct();
-//   },
-// };
+  computed: {
+    product() {
+      return this.productInfo;
+    },
+    category() {
+      return this.productInfo.category;
+    },
+    pricePretty() {
+      return numberFormat(this.product.price);
+    },
+  },
+  methods: {
+    ...mapActions(['addToCartProducts']),
+    loadProduct() {
+      axios.get(`${BASE_URL_API}/products/${+this.productId}`)
+        .then((response) => { this.productInfo = response.data; })
+        .then(() => { this.productLoading = false; });
+    },
+    goToPage,
+    addToCart() {
+      this.productAddToCart = false;
+      this.loadingProductAddToCart = true;
+      this.addToCartProducts({ productId: this.product.id, amount: this.count })
+        .then(() => {
+          this.productAddToCart = true;
+          this.loadingProductAddToCart = false;
+        });
+    },
+  },
+  created() {
+    this.loadProduct();
+  },
+  beforeRouteUpdate() {
+    this.loadProduct();
+  },
+};
 
 </script>

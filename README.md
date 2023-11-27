@@ -1,4 +1,4 @@
-# start-project
+# Online shop on Vue
 
 ## Project setup
 ```

@@ -82,7 +82,7 @@
           <ul class="cart__orders">
             <li class="cart__order" v-for="item in basket" :key="item.id">
               <h3>{{item.product.title}}</h3>
-              <b>{{item.quantity}} * {{item.product.price | numberFormat}} ₽</b>
+              <b>{{item.quantity}} * {{item.product.price}} ₽</b>
               <span>Артикул: {{item.product.id}}</span>
             </li>
           </ul>
@@ -98,12 +98,8 @@
 </template>
 
 <script>
-import numberFormat from '@/helpers/numberFormat';
 
 export default {
-  filters: {
-    numberFormat,
-  },
   computed: {
     info() {
       return this.$store.state.orderInfo;

@@ -10,10 +10,10 @@
     </div>
     <div class="content__catalog">
       <ProductFilter
-        :price-from.sync="filterPriceFrom"
-        :price-to.sync="filterPriceTo"
-        :category-id.sync="filterCategoryId"
-        :color-id.sync="filterColor"/>
+        v-model:price-from="filterPriceFrom"
+        v-model:price-to="filterPriceTo"
+        v-model:category-id="filterCategoryId"
+        v-model:color-id="filterColor"/>
       <section class="catalog">
         <h1 v-if="productsLoading">Идет загрузка товаров ...</h1>
         <ProductList :products="products"/>

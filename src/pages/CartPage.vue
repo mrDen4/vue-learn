@@ -35,12 +35,12 @@
             Мы&nbsp;посчитаем стоимость доставки на&nbsp;следующем этапе
           </p>
           <p class="cart__price">
-            Итого: <span>{{sumProductsPrice | numberFormat}} ₽</span>
+            Итого: <span>{{totalPricePretty}} ₽</span>
           </p>
 
-          <router-link tag="button" :to="{name: 'order'}"
-                       class="cart__button button button--primery" type="submit">
-            Оформить заказ
+          <router-link v-slot="{navigate}" :to="{name: 'order'}" custom>
+            <button class="cart__button button button--primery" type="button" @click="navigate">
+              Оформить заказ</button>
           </router-link>
         </div>
       </form>
@@ -50,16 +50,16 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import numberFormat from '@/helpers/numberFormat';
 import CartItem from '@/components/CartItem.vue';
+import numberFormat from '@/helpers/numberFormat';
 
 export default {
   components: { CartItem },
-  filters: {
-    numberFormat,
-  },
   computed: {
     ...mapGetters({ products: 'cartDetailProducts', sumProductsPrice: 'sumCartProducts' }),
+    totalPricePretty() {
+      return numberFormat(this.sumProductsPrice);
+    },
   },
 };
 </script>
